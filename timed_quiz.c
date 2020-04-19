@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
         move(y0,x0+len);
         pthread_mutex_unlock(&nc_out_mutex);
       }
-      if ( len<8 && newchar>='0' && newchar<='9')
+      else if ( len<8 && newchar>='0' && newchar<='9')
       {
         pthread_mutex_lock(&nc_out_mutex);
         mvaddch(y0,x0+len,newchar);

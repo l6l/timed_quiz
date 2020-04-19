@@ -34,11 +34,11 @@ Additional controls:
 * SPACE pauses the timer.
 * Q quits the program immediately.
 
-Ncurses is used to control terminal output, and pthread is used to control the timer. All ncurses output calls are guarded by a global mutex. The code is extremely simple and should work with most Unix-like environment, including Cygwin.
+Ncurses is used to control terminal output, and pthread is used to control the timer. All ncurses output calls are guarded by a global mutex. The code is very simple and should work with most Unix-like environment, including Cygwin.
 
 To build:
 ```
-$ gcc -o run_quiz.x timed_quiz.c -lncurses -lpthread
+$ gcc timed_quiz.c -o run_quiz.x -lncurses -lpthread
 ```
 
 Hope you find it useful!
