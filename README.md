@@ -1,6 +1,9 @@
 # timed_quiz
 A tiny terminal timed math quiz program using pthread and ncurses.
 
+Lixiang Luo
+April, 2020
+
 Screenshot:
 ```
 26   PAUSED                      │$ tail -f history.txt
