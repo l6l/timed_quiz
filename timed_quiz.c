@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
   cbreak ();
   refresh ();
   usleep(10000);
-  // keypad (stdscr, TRUE);
+  // keypad (stdscr, TRUE); // not need for now
 
   char str[80];
   int c_right,c_wrong;
