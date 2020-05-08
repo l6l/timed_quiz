@@ -85,7 +85,8 @@ int main(int argc, char *argv[])
 
   char str[80];
   int c_right,c_wrong;
-  int x1, x2;
+  int x1, x2, result;
+  int p_m;
   int ans;
   int len;
   char newchar;
@@ -111,12 +112,20 @@ int main(int argc, char *argv[])
   while ( sec_elapsed<quiz_timeout )
   {
     x1 = rand()%range; x2 = rand()%range;
+    p_m = rand()%3-1>0?1:-1;
+
+    if (p_m<0 && x1<x2)
+    {
+      result=x1; x1=x2; x2=result;
+    }
+    result = x1+p_m*x2;
+
     len = 0;
 
     pthread_mutex_lock(&nc_out_mutex);
     flushinp();
     mvaddstr(2, 5, "                          ");
-    mvprintw(2, 5, "%d + %d = ", x1, x2 );
+    mvprintw(2, 5, "%d %c %d = ", x1, (p_m>0?'+':'-'), x2 );
     getyx(mainwin,y0,x0);
     refresh();
     pthread_mutex_unlock(&nc_out_mutex);
@@ -176,7 +185,7 @@ int main(int argc, char *argv[])
     sscanf(str,"%d",&ans);
 
     pthread_mutex_lock(&nc_out_mutex);
-    if (ans==x1+x2)
+    if (ans==result)
     {
       mvaddstr(4, 5, "CORRECT!");
       c_right++;
