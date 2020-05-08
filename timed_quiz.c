@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <time.h>
+#include <string.h>
 
 int clockx = 0;
 int clocky = 0;
@@ -44,7 +45,8 @@ void *run_clock (void *v)
 int main(int argc, char *argv[])
 {
   /* ncurses init */
-  int range;
+  int range1, range2;
+  int q_type;
 
   if (argc<2)
   {
@@ -53,7 +55,7 @@ int main(int argc, char *argv[])
   else
   {
     sscanf(argv[1],"%d",&quiz_timeout);
-    if (quiz_timeout<10 || quiz_timeout>300)
+    if (quiz_timeout<10 || quiz_timeout>1200)
     {
       fprintf(stderr, "Timeout must be [10,300]\n");
       exit(EXIT_FAILURE);
@@ -62,14 +64,40 @@ int main(int argc, char *argv[])
 
   if (argc>=3)
   {
-    sscanf(argv[2],"%d",&range);
+    sscanf(argv[2],"%d",&range1);
   }
   else
   {
-    range = 100;
+    range1 = 100;
   }
-  range++;
+  range1++;
 
+  if (argc>=4)
+  {
+    sscanf(argv[3],"%d",&range2);
+  }
+  else
+  {
+    range2 = 100;
+  }
+  range2++;
+
+  if (argc>=5)
+  {
+    q_type = 1;
+    if (strcmp(argv[4],"+")==0)
+    {
+      q_type=1;
+    }
+    else if (strcmp(argv[4],"-")==0)
+    {
+      q_type=2;
+    }
+    else if (strcmp(argv[4],"+-")==0)
+    {
+      q_type=3;
+    }
+  }
 
   if ( (mainwin = initscr()) == NULL ) {
     fprintf(stderr, "Error initialising ncurses.\n");
@@ -111,8 +139,19 @@ int main(int argc, char *argv[])
 
   while ( sec_elapsed<quiz_timeout )
   {
-    x1 = rand()%range; x2 = rand()%range;
-    p_m = rand()%3-1>0?1:-1;
+    x1 = rand()%range1; x2 = rand()%range2;
+    if (q_type==1)
+    {
+      p_m = 1;
+    }
+    else if (q_type==2)
+    {
+      p_m = -1;
+    }
+    else if (q_type==3)
+    {
+      p_m = rand()%3-1>0?1:-1;
+    }
 
     if (p_m<0 && x1<x2)
     {
@@ -198,7 +237,7 @@ int main(int argc, char *argv[])
     refresh ();
     pthread_mutex_unlock(&nc_out_mutex);
 
-    fprintf(myfile,"%d + %d = %d %s\n",x1,x2,ans,(x1+x2==ans?" ":"  @"));
+    fprintf(myfile,"%d %c %d = %d %s\n", x1, (p_m>0?'+':'-'), x2, ans, (ans==result?" ":"  @"));
     fflush(myfile);
 
     getch();
