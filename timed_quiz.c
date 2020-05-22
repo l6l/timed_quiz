@@ -127,8 +127,9 @@ int main(int argc, char *argv[])
   c_right = 0;
   c_wrong = 0;
 
-  time_t now = time(0);
-  fprintf(myfile,"\n>>> %s\n",ctime(&now));
+  time_t t0 = time(0);
+  time_t t1;
+  fprintf(myfile,"\n>>> %s\n",ctime(&t0));
 
   //mvaddstr(2, 5, " "); // required, otherwise wrong cursor location
   mvaddstr(6,0,"Correct:    0\n  Wrong:    0");
@@ -168,6 +169,8 @@ int main(int argc, char *argv[])
     getyx(mainwin,y0,x0);
     refresh();
     pthread_mutex_unlock(&nc_out_mutex);
+
+    t0 = time(0);
 
     curs_set(1);
 
@@ -218,6 +221,8 @@ int main(int argc, char *argv[])
       }
     }
 
+    t1 = time(0);
+
     curs_set(0);
 
     str[len]=0;
@@ -237,7 +242,7 @@ int main(int argc, char *argv[])
     refresh ();
     pthread_mutex_unlock(&nc_out_mutex);
 
-    fprintf(myfile,"%d %c %d = %d %s\n", x1, (p_m>0?'+':'-'), x2, ans, (ans==result?" ":"  @"));
+    fprintf(myfile,"%d %c %d = %d %s %ld\n", x1, (p_m>0?'+':'-'), x2, ans, (ans==result?"  ":"  @"), t1-t0);
     fflush(myfile);
 
     getch();
