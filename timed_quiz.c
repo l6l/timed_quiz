@@ -45,7 +45,7 @@ void *run_clock (void *v)
 int main(int argc, char *argv[])
 {
   /* ncurses init */
-  int range1, range2;
+  int base1, range1, base2, range2;
   int q_type;
 
   if (argc<2)
@@ -64,20 +64,24 @@ int main(int argc, char *argv[])
 
   if (argc>=3)
   {
-    sscanf(argv[2],"%d",&range1);
+    sscanf(argv[2],"%d,%d",&base1,&range1);
+    range1 = range1 - base1;
   }
   else
   {
+    base1 = 0;
     range1 = 100;
   }
   range1++;
 
   if (argc>=4)
   {
-    sscanf(argv[3],"%d",&range2);
+    sscanf(argv[3],"%d,%d",&base2,&range2);
+    range2 = range2 - base2;
   }
   else
   {
+    base2 = 0;
     range2 = 100;
   }
   range2++;
@@ -107,6 +111,8 @@ int main(int argc, char *argv[])
   clear ();
   noecho ();
   cbreak ();
+  clear ();
+  usleep(10000);
   refresh ();
   usleep(10000);
   // keypad (stdscr, TRUE); // not need for now
@@ -140,7 +146,7 @@ int main(int argc, char *argv[])
 
   while ( sec_elapsed<quiz_timeout )
   {
-    x1 = rand()%range1; x2 = rand()%range2;
+    x1 = rand()%range1+base1; x2 = rand()%range2+base2;
     if (q_type==1)
     {
       p_m = 1;
