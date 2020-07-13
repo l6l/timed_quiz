@@ -114,8 +114,9 @@ if __name__ == "__main__":
     x = threading.Thread(target=timer_function, args=(1,), daemon=True)
     logging.debug("Main    : before running thread")
 
-    myaddstr(7,1,"Correct: 0");
-    myaddstr(8,1,"  Wrong: 0");
+    myaddstr(1,1,"0")
+    myaddstr(7,1,"Correct: 0")
+    myaddstr(8,1,"  Wrong: 0")
 
     x.start()
 
