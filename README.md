@@ -1,5 +1,5 @@
 # timed_quiz
-A tiny terminal timed math quiz program using pthread and ncurses.
+A tiny CLI timed math quiz program in Python3.
 
 Lixiang Luo
 
