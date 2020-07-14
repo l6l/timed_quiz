@@ -108,10 +108,6 @@ if __name__ == "__main__":
     logger.addHandler(fdbg)
 
     logging.info("\n======== "+str(datetime.datetime.now())+" ========")
-    logging.debug("Main    : before creating thread")
-    timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
-    logging.debug("Main    : before running thread")
-
 
     # main quiz codes
     s = ""
@@ -124,6 +120,7 @@ if __name__ == "__main__":
     myaddstr(7,1,"Correct: 0")
     myaddstr(8,1,"  Wrong: 0")
 
+    timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
     timer_thread.start()
 
     while sec < quiz_timeout:
