@@ -20,17 +20,17 @@ old_settings = termios.tcgetattr(fd)
 
 def myclrline(y,x):
     with lock:
-        sys.stdout.write ("\x1b7\x1b[?25l") # save cursor position and hide it
+        sys.stdout.write ("\x1b[s\x1b[?25l") # save cursor position and hide it
         sys.stdout.flush ()
         # [H-jump, [K-clear line, 8-restore cursor position and [?25h-show it
-        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H\x1b[K\x1b8\x1b[?25h")
+        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H\x1b[K\x1b[u\x1b[?25h")
         sys.stdout.flush ()
 
 def myaddstr(y,x,buf):
     with lock:
-        sys.stdout.write ("\x1b7\x1b[?25l")
+        sys.stdout.write ("\x1b[s\x1b[?25l")
         sys.stdout.flush ()
-        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H"+buf+"\x1b8\x1b[?25h")
+        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H"+buf+"\x1b[u\x1b[?25h")
         sys.stdout.flush ()
 
 def timer_function(name):
@@ -46,7 +46,7 @@ def timer_function(name):
         #myaddstr (0,0,str(sec));
         myaddstr (1, 1, "\x1b[2m"+str(sec)+"\x1b[m");
         if sec % 5 == 1:
-            myaddstr (10,10,str(int((c_right+c_wrong)*60/sec)));
+            myaddstr (10,10,str(int((c_right+c_wrong)*60./sec)));
 
     logging.debug("Thread %s: finishing", name)
 
@@ -194,7 +194,7 @@ if __name__ == "__main__":
                 elif ord(newchar) == 127:  # BACKSPACE
                     inplen = inplen - 1
                     with lock:
-                        sys.stdout.write ("\x1b[1D\x1b[K")
+                        sys.stdout.write ("\x1b[D\x1b[K")
                         sys.stdout.flush ()
 
         logging.debug (inpstr)
