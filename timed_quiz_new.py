@@ -1,40 +1,37 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 import logging
 import threading
 import time
+import datetime
 import sys
 import tty, termios
 import random
-import datetime
 import argparse
 import atexit
 
 sec=0
 sec_inc=1
-lock=None
+lock=threading.Lock()
+
+# Set up unbuffered read from stdin
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
-tty.setraw(sys.stdin.fileno())
 
 def myclrline(y,x):
     with lock:
-        sys.stdout.write("\x1b7\x1b[?25l"); # save cursor position and hide it
-        sys.stdout.flush()
-        sys.stdout.write("\x1b["+str(y)+";"+str(x)+"H");    # jump
-        sys.stdout.write("\x1b[K\x1b8\x1b[?25h");    # clear line, restore cursor position and show it
-        sys.stdout.flush()             # take effect
+        sys.stdout.write ("\x1b7\x1b[?25l") # save cursor position and hide it
+        sys.stdout.flush ()
+        # [H-jump, [K-clear line, 8-restore cursor position and [?25h-show it
+        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H\x1b[K\x1b8\x1b[?25h")
+        sys.stdout.flush ()
 
 def myaddstr(y,x,buf):
     with lock:
-        sys.stdout.write("\x1b7");     # save cursor position
-        sys.stdout.write("\x1b[?25l"); # hide cursor
-        sys.stdout.flush()             # take effect
-        sys.stdout.write("\x1b["+str(y)+";"+str(x)+"H");    # jump
-        sys.stdout.write(buf);         # write buf
-        sys.stdout.write("\x1b8");     # restore cursor position
-        sys.stdout.write("\x1b[?25h"); # show cursor
-        sys.stdout.flush()             # take effect
+        sys.stdout.write ("\x1b7\x1b[?25l")
+        sys.stdout.flush ()
+        sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H"+buf+"\x1b8\x1b[?25h")
+        sys.stdout.flush ()
 
 def timer_function(name):
     global sec
@@ -60,17 +57,20 @@ def cleanup():
 
 if __name__ == "__main__":
 
-    atexit.register (cleanup)
-    parser = argparse.ArgumentParser(description="Parses command.")
+    parser = argparse.ArgumentParser(description="Fun math quiz for kids!")
 
-    parser.add_argument("-T", "--timeout", type=int, default=10, help="timeout in seconds")
-    parser.add_argument("-t", "--type", type=int, default=1, help="quiz type")
-    parser.add_argument("-X1L", "--x1lower", type=int, default=0, help="x1 lower bound")
-    parser.add_argument("-X1U", "--x1upper", type=int, default=10, help="x1 upper bound")
-    parser.add_argument("-X2L", "--x2lower", type=int, default=0, help="x2 lower bound")
-    parser.add_argument("-X2U", "--x2upper", type=int, default=10, help="x2 upper bound")
+    parser.add_argument("-T", "--timeout", type=int, default=10, help="timeout in seconds (default=10)")
+    parser.add_argument("-t", "--type", type=int, default=1, help="quiz type (1:add,2:sub,3:add+sub,default=1)")
+    parser.add_argument("-X1L", "--x1lower", type=int, default=0, help="x1 lower bound (default=0)")
+    parser.add_argument("-X1U", "--x1upper", type=int, default=10, help="x1 upper bound (default=10)")
+    parser.add_argument("-X2L", "--x2lower", type=int, default=0, help="x2 lower bound (default=0)")
+    parser.add_argument("-X2U", "--x2upper", type=int, default=10, help="x2 upper bound (default=10)")
 
-    options = parser.parse_args(sys.argv[1:])
+    try:
+        options = parser.parse_args(sys.argv[1:])
+    except:
+        print("Error parsing arguments!");
+        sys.exit()
 
     quiz_timeout = options.timeout
     lower1 = options.x1lower
@@ -85,19 +85,17 @@ if __name__ == "__main__":
     else:
         q_type = 1  # add
 
-    s = ""
-    sec = 0
-    inplen = 0
-    inpstr = [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ']
-    c_right = 0
-    c_wrong = 0
-    signchar = ('-','+')
-    lock=threading.Lock()
+    # Proper TTY reset
+    atexit.register (cleanup)
 
-    sys.stdout.write("\x1b[f\x1b[J") # clear screen
+    # Prepare TTY for full-screen mode
+    tty.setraw (sys.stdin.fileno())
+    sys.stdout.write ("\x1b[f\x1b[J") # clear screen
+    sys.stdout.flush ()
 
+    # Set up logger output
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     flog=logging.FileHandler('history.log')
     flog.setLevel(logging.INFO)
@@ -105,24 +103,33 @@ if __name__ == "__main__":
     logger.addHandler(flog)
 
     fdbg=logging.FileHandler('debug.log')
-    #fdbg.setLevel(logging.DEBUG)
+    fdbg.setLevel(logging.DEBUG)
     fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
     logger.addHandler(fdbg)
 
     logging.info("\n======== "+str(datetime.datetime.now())+" ========")
     logging.debug("Main    : before creating thread")
-    x = threading.Thread(target=timer_function, args=(1,), daemon=True)
+    timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
     logging.debug("Main    : before running thread")
+
+
+    # main quiz codes
+    s = ""
+    sec = 0
+    c_right = 0
+    c_wrong = 0
+    signchar = ('-','+')
 
     myaddstr(1,1,"0")
     myaddstr(7,1,"Correct: 0")
     myaddstr(8,1,"  Wrong: 0")
 
-    x.start()
+    timer_thread.start()
 
     while sec < quiz_timeout:
 
-        t0 = datetime.datetime.now()
+        inplen = 0
+        inpstr = [' ' for i in range(10)]
 
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
@@ -143,27 +150,28 @@ if __name__ == "__main__":
         else:
             result = x1 + x2
 
-        inplen = 0
+        t0 = datetime.datetime.now ()
 
         with lock:
-            sys.stdout.write("\x1b[3;6H");    # jump
-            sys.stdout.write(str(x1) + " " + signchar[p_m] + " " + str(x2) + " = ")
-            sys.stdout.write("\x1b[K\x1b[?25h"); # clear line, show cursor
-            sys.stdout.flush()
+            sys.stdout.write ("\x1b[3;6H"+ \
+              str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
+              "\x1b[K\x1b[?25h") # clear line, show cursor
+            sys.stdout.flush ()
 
         while True:
 
+            # Read 1 character
             newchar = sys.stdin.read(1)
 
-            if newchar == 'Q':
+            if newchar == 'Q':   # immediately quit
                 sys.exit ()
 
-            elif newchar == ' ':
+            elif newchar == ' ':  # toggle pause
                 if sec_inc == 0:
-                    myclrline(0,5)
+                    myclrline (0,5)
                     sec_inc = 1
                 else:
-                    myaddstr(0,5,"PAUSED")
+                    myaddstr (0,5,"PAUSED")
                     sec_inc = 0
 
             elif inplen<8 and newchar>='0' and newchar<='9':
@@ -183,7 +191,7 @@ if __name__ == "__main__":
                         sys.stdout.write ("\x1b[1D\x1b[K")
                         sys.stdout.flush ()
 
-        logging.debug(inpstr)
+        logging.debug (inpstr)
         ans = int(s.join(inpstr))
 
         if ans == result:
@@ -197,13 +205,13 @@ if __name__ == "__main__":
 
         td = datetime.datetime.now() - t0
 
-        logging.info( str(x1) + " " + signchar[p_m] + " " + str(x2) + " = " \
-            + str(result) + " " + markchar + " " + str(int(td.total_seconds())) )
+        logging.info( "%1s %3d    %d %s %d = %d" % \
+          ( markchar, int(td.total_seconds()), x1, signchar[p_m], x2, ans ) )
 
         newchar = sys.stdin.read(1)
 
-        myclrline(5,6);
-        myaddstr(7,1,"Correct: "+str(c_right));
-        myaddstr(8,1,"  Wrong: "+str(c_wrong));
+        myclrline (5,6);
+        myaddstr (7,1,"Correct: "+str(c_right));
+        myaddstr (8,1,"  Wrong: "+str(c_wrong));
 
 
