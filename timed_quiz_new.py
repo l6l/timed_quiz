@@ -117,8 +117,8 @@ if __name__ == "__main__":
     signchar = ('-','+')
 
     myaddstr(1,1,"0")
-    myaddstr(7,1,"Correct: 0")
-    myaddstr(8,1,"  Wrong: 0")
+    myaddstr(8,1,"Correct: 0")
+    myaddstr(9,1,"  Wrong: 0")
 
     timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
     timer_thread.start()
@@ -192,11 +192,11 @@ if __name__ == "__main__":
         ans = int(s.join(inpstr))
 
         if ans == result:
-            myaddstr(5, 6, "CORRECT!");
+            myaddstr(5, 6, "\x1b[32mCORRECT!\x1b[m");
             c_right = c_right + 1
             markchar = ' '
         else:
-            myaddstr(5, 6, "WRONG!  ");
+            myaddstr(5, 6, "\x1b[91mWRONG!  \x1b[m");
             c_wrong = c_wrong + 1
             markchar = '@'
 
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         newchar = sys.stdin.read(1)
 
         myclrline (5,6);
-        myaddstr (7,1,"Correct: "+str(c_right));
-        myaddstr (8,1,"  Wrong: "+str(c_wrong));
+        myaddstr (8,10,str(c_right));
+        myaddstr (9,10,str(c_wrong));
 
 
