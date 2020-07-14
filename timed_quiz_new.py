@@ -62,18 +62,37 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Fun math quiz for kids!")
 
-    parser.add_argument("-T", "--timeout", type=int, default=10, help="timeout in seconds (default=10)")
-    parser.add_argument("-t", "--type", type=int, default=1, help="quiz type (1:add,2:sub,3:add+sub,default=1)")
-    parser.add_argument("-X1L", "--x1lower", type=int, default=0, help="x1 lower bound (default=0)")
-    parser.add_argument("-X1U", "--x1upper", type=int, default=10, help="x1 upper bound (default=10)")
-    parser.add_argument("-X2L", "--x2lower", type=int, default=0, help="x2 lower bound (default=0)")
-    parser.add_argument("-X2U", "--x2upper", type=int, default=10, help="x2 upper bound (default=10)")
+    parser.add_argument("--timeout", type=int, default=10, help="timeout in seconds (default=10)")
+    parser.add_argument("--type",    type=int, default=1, help="quiz type (1:add,2:sub,3:add+sub,default=1)")
+    parser.add_argument("--x1lower", type=int, default=0, help="x1 lower bound (default=0)")
+    parser.add_argument("--x1upper", type=int, default=10, help="x1 upper bound (default=10)")
+    parser.add_argument("--x2lower", type=int, default=0, help="x2 lower bound (default=0)")
+    parser.add_argument("--x2upper", type=int, default=10, help="x2 upper bound (default=10)")
+    parser.add_argument("--log",     choices=['INFO','info','DEBUG','debug'], default="INFO", help="log level (default=INFO)")
 
     try:
         options = parser.parse_args(sys.argv[1:])
     except:
         print("Error parsing arguments!");
         sys.exit()
+
+    # Set up logger output
+    logger = logging.getLogger()
+
+    flog=logging.FileHandler('history.log')
+    flog.setLevel(logging.INFO)
+    flog.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(flog)
+
+    fdbg=logging.FileHandler('debug.log')
+    fdbg.setLevel(logging.DEBUG)
+    fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
+    logger.addHandler(fdbg)
+
+    numeric_level = getattr(logging, options.log.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % loglevel)
+    logger.setLevel(numeric_level)
 
     quiz_timeout = options.timeout
     lower1 = options.x1lower
@@ -88,31 +107,17 @@ if __name__ == "__main__":
     else:
         q_type = 1  # add
 
-    # Proper TTY reset
+    # Proper TTY reset at exit
     atexit.register (cleanup)
 
-    # Prepare TTY for full-screen mode
+    # TTY fullscreen and unbuffered input
     tty.setraw (sys.stdin.fileno())
     sys.stdout.write ("\x1b[f\x1b[J") # clear screen
     sys.stdout.flush ()
 
-    # Set up logger output
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-
-    flog=logging.FileHandler('history.log')
-    flog.setLevel(logging.INFO)
-    flog.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(flog)
-
-    fdbg=logging.FileHandler('debug.log')
-    fdbg.setLevel(logging.DEBUG)
-    fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
-    logger.addHandler(fdbg)
-
+    # main quiz codes
     logging.info("\n======== "+str(datetime.datetime.now())+" ========")
 
-    # main quiz codes
     s = ""
     sec = 0
     c_right = 0
@@ -212,7 +217,7 @@ if __name__ == "__main__":
         newchar = sys.stdin.read(1)
 
         myclrline (5,6);
-        myaddstr ( 8,10,str(c_right));
-        myaddstr ( 9,10,str(c_wrong));
+        myaddstr (8,10,str(c_right));
+        myaddstr (9,10,str(c_wrong));
 
 
