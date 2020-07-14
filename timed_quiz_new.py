@@ -43,7 +43,10 @@ def timer_function(name):
         time.sleep(1)
         logging.debug(sec)
         sec = sec + sec_inc
-        myaddstr(0,0,str(sec));
+        #myaddstr (0,0,str(sec));
+        myaddstr (1, 1, "\x1b[2m"+str(sec)+"\x1b[m");
+        if sec % 5 == 1:
+            myaddstr (10,10,str(int((c_right+c_wrong)*60/sec)));
 
     logging.debug("Thread %s: finishing", name)
 
@@ -116,9 +119,10 @@ if __name__ == "__main__":
     c_wrong = 0
     signchar = ('-','+')
 
-    myaddstr(1,1,"0")
-    myaddstr(8,1,"Correct: 0")
-    myaddstr(9,1,"  Wrong: 0")
+    myaddstr ( 1,1,"\x1b[2m0\x1b[m")
+    myaddstr ( 8,1,"Correct: 0")
+    myaddstr ( 9,1,"  Wrong: 0")
+    myaddstr (10,1,"    APM: 0")
 
     timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
     timer_thread.start()
@@ -208,7 +212,7 @@ if __name__ == "__main__":
         newchar = sys.stdin.read(1)
 
         myclrline (5,6);
-        myaddstr (8,10,str(c_right));
-        myaddstr (9,10,str(c_wrong));
+        myaddstr ( 8,10,str(c_right));
+        myaddstr ( 9,10,str(c_wrong));
 
 
