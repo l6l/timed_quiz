@@ -20,6 +20,7 @@ lock=threading.Lock()
 # Set up unbuffered read from stdin
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
+flog = open('history.txt','a')
 #}}}
 
 ##################     Functions      ################## {{{
@@ -44,24 +45,25 @@ def timer_function(name): #{{{
     global sec
     global lock
 
-    logging.debug("Thread %s: starting", name)
+    logging.debug ("Thread %s: starting", name)
 
     while True:
         time.sleep(1)
-        logging.debug(sec)
+        logging.debug (sec)
         sec = sec + sec_inc
         myaddstr (1, 1, "\x1b[2m"+str(sec)+"\x1b[m");
         if sec % 5 == 1:
             myaddstr (10,10,str(int((c_right+c_wrong)*60./sec)));
 
-    logging.debug("Thread %s: finishing", name)
+    logging.debug ("Thread %s: finishing", name)
 #}}}
 
 def cleanup(): #{{{
     sys.stdout.write("\x1bc\x1b[?25h\x1b[f\x1b[J") # clear screen
     sys.stdout.flush ()
     termios.tcsetattr (fd, termios.TCSADRAIN, old_settings)
-    logging.debug("Main    : all done")
+    logging.debug ("Main    : all done")
+    flog.close ()
 #}}}
 #}}}
 
@@ -75,7 +77,7 @@ parser.add_argument("--x1lower", type=int, default=0, help="x1 lower bound (defa
 parser.add_argument("--x1upper", type=int, default=10, help="x1 upper bound (default=10)")
 parser.add_argument("--x2lower", type=int, default=0, help="x2 lower bound (default=0)")
 parser.add_argument("--x2upper", type=int, default=10, help="x2 upper bound (default=10)")
-parser.add_argument("--log",     choices=['INFO','info','DEBUG','debug'], default="INFO", help="log level (default=INFO)")
+parser.add_argument("--log", choices=['INFO','info','DEBUG','debug'], default="INFO", help="log level (default=INFO)")
 
 try:
     options = parser.parse_args(sys.argv[1:])
@@ -85,12 +87,6 @@ except:
 
 # Set up logger output
 logger = logging.getLogger()
-
-flog=logging.FileHandler('history.log')
-flog.setLevel(logging.INFO)
-flog.setFormatter(logging.Formatter("%(message)s"))
-logger.addHandler(flog)
-
 fdbg=logging.FileHandler('debug.log')
 fdbg.setLevel(logging.DEBUG)
 fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
@@ -123,7 +119,7 @@ sys.stdout.write ("\x1b[f\x1b[J") # clear screen
 sys.stdout.flush ()
 
 # main quiz codes
-logging.info("\n======== "+str(datetime.datetime.now())+" ========\n")
+flog.write("\n======== "+str(datetime.datetime.now())+" ========\n\n")
 
 s = ""
 sec = 0
@@ -172,7 +168,7 @@ while sec < quiz_timeout:
           "\x1b[K\x1b[?25h") # clear line, show cursor
         sys.stdout.flush ()
 
-    # Input process loop {{{
+    # Input processing loop {{{
     while True:
 
         # Read 1 character
@@ -205,7 +201,7 @@ while sec < quiz_timeout:
                 with lock:
                     sys.stdout.write ("\x1b[D\x1b[K")
                     sys.stdout.flush ()
-    # END input process loop}}}
+    # END input processing loop}}}
 
     logging.debug (inpstr)
     ans = int(s.join(inpstr))
@@ -221,7 +217,7 @@ while sec < quiz_timeout:
 
     td = datetime.datetime.now() - t0
 
-    logging.info( "%1s %3d    %d %s %d = %d" % \
+    flog.write( "%1s %3d    %d %s %d = %d\n" % \
       ( markchar, int(td.total_seconds()), x1, signchar[p_m], x2, ans ) )
 
     newchar = sys.stdin.read(1)
