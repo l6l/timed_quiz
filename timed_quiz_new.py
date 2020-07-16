@@ -66,9 +66,10 @@ def timer_function(name): #{{{
         time.sleep(1)
         logging.debug (sec)
         sec = sec + sec_inc
-        myaddstr (1, 1, "\x1b[2m"+str(sec)+"\x1b[m");
+        towrite = [(1, 1, "\x1b[2m"+str(sec)+"\x1b[m")];
         if sec % 5 == 1:
-            myaddstr (10,10,str(int((c_right+c_wrong)*60./sec)));
+            towrite.append ((10,10,str(int((c_right+c_wrong)*60./sec))));
+        myaddstr_m (towrite)
 
     logging.debug ("Thread %s: finishing", name)
 #}}}
