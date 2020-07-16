@@ -12,8 +12,7 @@ import argparse
 import atexit
 # }}}
 
-##################  Global variables  ################## {{{
-
+##################    Global stuff    ################## {{{
 sec=0
 sec_inc=1
 lock=threading.Lock()
@@ -21,6 +20,13 @@ lock=threading.Lock()
 fd = sys.stdin.fileno()
 old_settings = termios.tcgetattr(fd)
 flog = open('history.txt','a')
+
+# Set up logger output
+logger = logging.getLogger()
+fdbg=logging.FileHandler('debug.log')
+fdbg.setLevel(logging.DEBUG)
+fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
+logger.addHandler(fdbg)
 #}}}
 
 ##################     Functions      ################## {{{
@@ -39,6 +45,15 @@ def myaddstr(y,x,buf): #{{{
         sys.stdout.flush ()
         sys.stdout.write ("\x1b["+str(y)+";"+str(x)+"H"+buf+"\x1b[u\x1b[?25h")
         sys.stdout.flush ()
+#}}}
+
+def myaddstr_m(yxbuf): #{{{
+    with lock:
+        for i in yxbuf:
+            sys.stdout.write ("\x1b[s\x1b[?25l")
+            sys.stdout.flush ()
+            sys.stdout.write ("\x1b["+str(i[0])+";"+str(i[1])+"H"+i[2]+"\x1b[u\x1b[?25h")
+            sys.stdout.flush ()
 #}}}
 
 def timer_function(name): #{{{
@@ -85,12 +100,6 @@ except:
     print("Error parsing arguments!");
     sys.exit()
 
-# Set up logger output
-logger = logging.getLogger()
-fdbg=logging.FileHandler('debug.log')
-fdbg.setLevel(logging.DEBUG)
-fdbg.setFormatter(logging.Formatter("%(asctime)s: %(message)s",'%H:%M:%S'))
-logger.addHandler(fdbg)
 
 numeric_level = getattr(logging, options.log.upper(), None)
 if not isinstance(numeric_level, int):
@@ -127,10 +136,10 @@ c_right = 0
 c_wrong = 0
 signchar = ('-','+')
 
-myaddstr ( 1,1,"\x1b[2m0\x1b[m")
-myaddstr ( 8,1,"Correct: 0")
-myaddstr ( 9,1,"  Wrong: 0")
-myaddstr (10,1,"    APM: 0")
+myaddstr_m ((( 1,1,"\x1b[2m0\x1b[m"),\
+             ( 8,1,"Correct: 0"),\
+             ( 9,1,"  Wrong: 0"),\
+             (10,1,"    APM: 0")))
 
 timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
 timer_thread.start()
@@ -223,7 +232,7 @@ while sec < quiz_timeout:
     newchar = sys.stdin.read(1)
 
     myclrline (5,6);
-    myaddstr (8,10,str(c_right));
-    myaddstr (9,10,str(c_wrong));
+    myaddstr_m (((8,10,str(c_right)),
+                 (9,10,str(c_wrong))));
 
 # END question loop }}}
