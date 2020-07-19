@@ -68,7 +68,7 @@ def timer_function(name): #{{{
         sec = sec + sec_inc
         towrite = [(1, 1, "\x1b[2m"+str(sec)+"\x1b[m")];
         if sec % 5 == 1:
-            towrite.append ((10,10,str(int((c_right+c_wrong)*60./sec))+"   "));
+            towrite.append ((10,10,str(int((c_right+c_wrong)*60./sec))+"  "));
         myaddstr_m (towrite)
 
     logging.debug ("Thread %s: finishing", name)
@@ -87,13 +87,11 @@ def cleanup(): #{{{
 
 parser = argparse.ArgumentParser(description="Fun math quiz for kids!")
 
-parser.add_argument("--timeout", type=int, default=10, help="timeout in seconds (default=10)")
-parser.add_argument("--type",    type=int, default=1, help="quiz type (1:add,2:sub,3:add+sub,default=1)")
-parser.add_argument("--x1lower", type=int, default=0, help="x1 lower bound (default=0)")
-parser.add_argument("--x1upper", type=int, default=10, help="x1 upper bound (default=10)")
-parser.add_argument("--x2lower", type=int, default=0, help="x2 lower bound (default=0)")
-parser.add_argument("--x2upper", type=int, default=10, help="x2 upper bound (default=10)")
-parser.add_argument("--log", choices=['INFO','info','DEBUG','debug'], default="INFO", help="log level (default=INFO)")
+parser.add_argument('-T','--timeout', type=int, default=10, help='timeout in seconds (default=10)')
+parser.add_argument('-t','--type',    type=int, default=1, help='quiz type (1:add,2:sub,3:add+sub,default=1)')
+parser.add_argument('-r1', '--x1range', type=str, default='0,10', help='x1 range')
+parser.add_argument('-r2', '--x2range', type=str, default='0,10', help='x2 range')
+parser.add_argument('--log', choices=['INFO','info','DEBUG','debug'], default='INFO', help='log level (default=INFO)')
 
 try:
     options = parser.parse_args(sys.argv[1:])
@@ -101,17 +99,19 @@ except:
     print("Error parsing arguments!");
     sys.exit()
 
-
 numeric_level = getattr(logging, options.log.upper(), None)
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % loglevel)
 logger.setLevel(numeric_level)
 
 quiz_timeout = options.timeout
-lower1 = options.x1lower
-upper1 = options.x1upper
-lower2 = options.x2lower
-upper2 = options.x2upper
+
+lower1,upper1  = options.x1range.split(',')
+lower2,upper2  = options.x2range.split(',')
+lower1 = int(lower1)
+upper1 = int(upper1)
+lower2 = int(lower2)
+upper2 = int(upper2)
 
 if options.type == 1: # sub
     q_type = 2
