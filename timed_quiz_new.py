@@ -214,7 +214,7 @@ while sec < quiz_timeout:
     # END input processing loop}}}
 
     logging.debug (inpstr)
-    ans = int(s.join(inpstr))
+    ans = int(s.join(inpstr[0:inplen]))
 
     if ans == result:
         myaddstr(5, 6, "\x1b[32mCORRECT!\x1b[m");
