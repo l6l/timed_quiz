@@ -62,7 +62,7 @@ def timer_function(name): #{{{
 
     logging.debug ("Thread %s: starting", name)
 
-    while True:
+    while sec<quiz_timeout:
         time.sleep(1)
         logging.debug (sec)
         sec = sec + sec_inc
@@ -70,6 +70,8 @@ def timer_function(name): #{{{
         if sec % 5 == 1:
             towrite.append ((10,10,str(int((c_right+c_wrong)*60./sec))+"  "));
         myaddstr_m (towrite)
+
+    myaddstr (1, 1, "\x1b[2m"+str(sec)+"\x1b[m  TIMEOUT!")
 
     logging.debug ("Thread %s: finishing", name)
 #}}}
@@ -237,3 +239,5 @@ while sec < quiz_timeout:
                  (9,10,str(c_wrong))));
 
 # END question loop }}}
+
+newchar = sys.stdin.read(1)
