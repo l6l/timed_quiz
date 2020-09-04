@@ -34,7 +34,7 @@ In this example, the quiz program and a separte shell showing the history record
 
 Example command line:
 ```
-$ ./timed_quiz_new.py --timeout=20 --type=2 --x1lrange=8,10 --x2range=2,6
+$ ./timed_quiz_new.py --timeout=20 --type=2 --x1range=8,10 --x2range=2,6
 ```
 
 Use "-h" argument to check optional aruguments.
