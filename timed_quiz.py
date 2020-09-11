@@ -93,6 +93,8 @@ def _get_termsize(): #{{{
     return cr  # (rows,columns)
 #}}}
 
+#}}}
+
 ##################    Main program    ##################
 
 parser = argparse.ArgumentParser(description="Fun math quiz for kids!")
