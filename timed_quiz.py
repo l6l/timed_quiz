@@ -86,10 +86,9 @@ def cleanup(): #{{{
     flog.close ()
 #}}}
 
-def _get_termsize():
+def _get_termsize(): #{{{
     import struct
     import fcntl
-    import termios
     cr = struct.unpack('hh',fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
     return cr  # (rows,columns)
 #}}}
