@@ -129,6 +129,8 @@ if options.type == 1: # sub
     q_type = 2
 elif options.type == 2: # add/sub
     q_type = 3
+elif options.type == 3: # add/sub correspondence
+    q_type = 4
 else:
     q_type = 1  # add
 
@@ -163,14 +165,20 @@ myaddstr_m ((( 1-y0,1-x0,"\x1b[2m0\x1b[m"),\
 timer_thread = threading.Thread(target=timer_function, args=(1,), daemon=True)
 timer_thread.start()
 
+p_m = 0
 # Main loop over questions {{{
 while sec < quiz_timeout:
 
     inplen = 0
     inpstr = [' ' for i in range(10)]
 
-    x1 = random.randint(lower1,upper1)
-    x2 = random.randint(lower2,upper2)
+    if (q_type == 4 and p_m == 1): 
+        x1 = x1 + x2
+        if random.randint(0,1) == 1:
+            x2 = x1 - x2
+    else:
+        x1 = random.randint(lower1,upper1)
+        x2 = random.randint(lower2,upper2)
 
     if q_type == 1:
         p_m = 1
@@ -178,6 +186,8 @@ while sec < quiz_timeout:
         p_m = 0
     elif q_type == 3:
         p_m = random.randint(0,1)
+    else:
+        p_m = 1 - p_m
 
     if p_m == 0:
         if x1 < x2:
