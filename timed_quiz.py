@@ -125,14 +125,21 @@ upper1 = int(upper1)
 lower2 = int(lower2)
 upper2 = int(upper2)
 
-if options.type == 1: # sub
-    q_type = 2
-elif options.type == 2: # add/sub
-    q_type = 3
-elif options.type == 3: # add/sub correspondence
-    q_type = 4
-else:
-    q_type = 1  # add
+q_type = options.type
+# 1: add
+# 2: sub
+# 3: add/sub
+# 4: add/sub with r1 for result range, (r1 -+ r2) +- r2 = ?
+# 5: r1 = r2 +- ?
+
+#if options.type == 1: # sub
+#    q_type = 2
+#elif options.type == 2: # add/sub
+#    q_type = 3
+#elif options.type == 3: # add/sub correspondence
+#    q_type = 4
+#else:
+#    q_type = 1  # add
 
 # Proper TTY reset at exit
 atexit.register (cleanup)
@@ -172,38 +179,68 @@ while sec < quiz_timeout:
     inplen = 0
     inpstr = [' ' for i in range(10)]
 
-    if (q_type == 4 and p_m == 1): 
-        x1 = x1 + x2
-        if random.randint(0,1) == 1:
-            x2 = x1 - x2
+    # question generation {{{
+    if q_type == 5 or q_type == 6:
+        x1 = random.randint(lower1,upper1)
+        x2 = random.randint(lower2,upper2)
+
+        if q_type == 6:
+            p_m = random.randint(0,1)
+        else:
+            p_m = 1
+        
+        if p_m == 0:
+            result = x2 - x1
+        else: 
+            result = x1 - x2
+
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
+            str(x1)+" = "+str(x2)+" "+signchar[p_m]+" "+ \
+            "\x1b[K\x1b[?25h"
+
+    elif q_type == 4: 
+
+        result = random.randint(lower1,upper1)
+        x2 = random.randint(lower2,upper2)
+        p_m = random.randint(0,1)
+        if p_m == 0:
+            x1 = result + x2
+        else:
+            x1 = result - x2
+
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
+            str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
+            "\x1b[K\x1b[?25h"
+
     else:
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
 
-    if q_type == 1:
-        p_m = 1
-    elif q_type == 2:
-        p_m = 0
-    elif q_type == 3:
-        p_m = random.randint(0,1)
-    else:
-        p_m = 1 - p_m
+        if q_type == 1:
+            p_m = 1
+        elif q_type == 2:
+            p_m = 0
+        elif q_type == 3:
+            p_m = random.randint(0,1)
+        else:
+            p_m = 1 - p_m
 
-    if p_m == 0:
-        if x1 < x2:
-            tv = x1
-            x1 = x2
-            x2 = tv
-        result = x1 - x2
-    else:
-        result = x1 + x2
+        if p_m == 0:
+            if x1 < x2:
+                tv = x1
+                x1 = x2
+                x2 = tv
+            result = x1 - x2
+        else:
+            result = x1 + x2
 
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
+            str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
+            "\x1b[K\x1b[?25h"
     t0 = datetime.datetime.now ()
 
     with lock:
-        sys.stdout.write ("\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
-          str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
-          "\x1b[K\x1b[?25h") # clear line, show cursor
+        sys.stdout.write (qstr) # clear line, show cursor
         sys.stdout.flush ()
 
     # Input processing loop {{{
