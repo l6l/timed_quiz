@@ -100,7 +100,7 @@ def _get_termsize(): #{{{
 parser = argparse.ArgumentParser(description="Fun math quiz for kids!")
 
 parser.add_argument('-T','--timeout', type=int, default=10, help='timeout in seconds (default=10)')
-parser.add_argument('-t','--type',    type=int, default=1, help='quiz type (1:add,2:sub,3:add+sub,default=1)')
+parser.add_argument('-t','--type',    type=str, default=1, help='quiz type (1:add,2:sub,3:add+sub,default=1)')
 parser.add_argument('-r1', '--x1range', type=str, default='0,10', help='x1 range')
 parser.add_argument('-r2', '--x2range', type=str, default='0,10', help='x2 range')
 parser.add_argument('--log', choices=['INFO','info','DEBUG','debug'], default='INFO', help='log level (default=INFO)')
@@ -125,21 +125,15 @@ upper1 = int(upper1)
 lower2 = int(lower2)
 upper2 = int(upper2)
 
-q_type = options.type
+list_q_type = [int(i) for i in options.type.split(',')]
+num_q_type = len(list_q_type)
+print(num_q_type,list_q_type)
+
 # 1: add
 # 2: sub
 # 3: add/sub
 # 4: add/sub with r1 for result range, (r1 -+ r2) +- r2 = ?
 # 5: r1 = r2 +- ?
-
-#if options.type == 1: # sub
-#    q_type = 2
-#elif options.type == 2: # add/sub
-#    q_type = 3
-#elif options.type == 3: # add/sub correspondence
-#    q_type = 4
-#else:
-#    q_type = 1  # add
 
 # Proper TTY reset at exit
 atexit.register (cleanup)
@@ -180,6 +174,11 @@ while sec < quiz_timeout:
     inpstr = [' ' for i in range(10)]
 
     # question generation {{{
+    if num_q_type > 1:
+        q_type = list_q_type[random.randint(0,num_q_type-1)]
+    else:
+        q_type = list_q_type[0]
+
     if q_type == 5 or q_type == 6:
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
