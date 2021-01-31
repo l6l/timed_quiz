@@ -180,6 +180,7 @@ while sec < quiz_timeout:
         q_type = list_q_type[0]
 
     if q_type == 5 or q_type == 6:
+
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
 
@@ -189,9 +190,11 @@ while sec < quiz_timeout:
             p_m = 1
         
         if p_m == 0:
-            result = x2 - x1
+            result = x2
+            x2 = x1 + x2
         else: 
-            result = x1 - x2
+            result = x1
+            x1 = x1 + x2
 
         qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
             str(x1)+" = "+str(x2)+" "+signchar[p_m]+" "+ \
@@ -202,6 +205,7 @@ while sec < quiz_timeout:
         result = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
         p_m = random.randint(0,1)
+
         if p_m == 0:
             x1 = result + x2
         else:
@@ -212,6 +216,7 @@ while sec < quiz_timeout:
             "\x1b[K\x1b[?25h"
 
     else:
+
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
 
@@ -236,6 +241,9 @@ while sec < quiz_timeout:
         qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
             str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
             "\x1b[K\x1b[?25h"
+
+    # }}}
+
     t0 = datetime.datetime.now ()
 
     with lock:
