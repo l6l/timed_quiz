@@ -202,12 +202,13 @@ while sec < quiz_timeout:
     elif q_type == 4: 
 
         result = random.randint(lower1,upper1)
-        x2 = random.randint(lower2,upper2)
         p_m = random.randint(0,1)
 
         if p_m == 0:
+            x2 = random.randint(lower2,upper2)
             x1 = result + x2
         else:
+            x2 = random.randint(lower2,result)
             x1 = result - x2
 
         qstr0 = str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "
