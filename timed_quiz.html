@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<p id="elapsed_time">0</p>
+<script>
+var t=0;
+var running=0;
+
+function myFunction() {
+  if (running==1) t=t+1;
+  document.getElementById('elapsed_time').innerHTML = t.toString();
+}
+
+function on_click_start() {
+running=1-running;
+if (running==1){
+document.querySelector('#start_button').innerHTML = 'Stop';
+h_timer = setInterval(myFunction, 1000);}
+else {
+document.querySelector('#start_button').innerHTML = 'Start'
+clearTimeout(h_timer);
+}
+}
+
+function process_ans(ele) {
+    if(event.key === 'Enter') {
+        if (parseInt(ele.value) === 10)
+           document.getElementById('response').innerHTML="Correct!";
+        else
+           document.getElementById('response').innerHTML="Wrong!";
+    }
+}
+</script>
+
+<button id="start_button" onclick="on_click_start()">Start</button>
+
+<p id="question" style="text-align:center;font-size:64pt">7 + 3 = </p>
+<p id="response" style="text-align:center;font-size:48pt"><br></p>
+<input type="number" name="txtbx_ans" style="width:100%;text-align:center;font-size:64pt"
+ onkeydown="process_ans(this)"/>
+</body>
+</html>
