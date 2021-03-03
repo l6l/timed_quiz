@@ -180,6 +180,7 @@ while sec < quiz_timeout:
         q_type = list_q_type[0]
 
     if q_type == 5 or q_type == 6:
+
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
 
@@ -189,29 +190,32 @@ while sec < quiz_timeout:
             p_m = 1
         
         if p_m == 0:
-            result = x2 - x1
+            result = x2
+            x2 = x1 + x2
         else: 
-            result = x1 - x2
+            result = x1
+            x1 = x1 + x2
 
-        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
-            str(x1)+" = "+str(x2)+" "+signchar[p_m]+" "+ \
-            "\x1b[K\x1b[?25h"
+        qstr0 = str(x1)+" = "+str(x2)+" "+signchar[p_m]+" "
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ qstr0 + "\x1b[K\x1b[?25h"
 
     elif q_type == 4: 
 
         result = random.randint(lower1,upper1)
-        x2 = random.randint(lower2,upper2)
         p_m = random.randint(0,1)
+
         if p_m == 0:
+            x2 = random.randint(lower2,upper2)
             x1 = result + x2
         else:
+            x2 = random.randint(lower2,result)
             x1 = result - x2
 
-        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
-            str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
-            "\x1b[K\x1b[?25h"
+        qstr0 = str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ qstr0 + "\x1b[K\x1b[?25h"
 
     else:
+
         x1 = random.randint(lower1,upper1)
         x2 = random.randint(lower2,upper2)
 
@@ -233,9 +237,11 @@ while sec < quiz_timeout:
         else:
             result = x1 + x2
 
-        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ \
-            str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "+ \
-            "\x1b[K\x1b[?25h"
+        qstr0 = str(x1) +" "+ signchar[p_m] +" "+ str(x2) +" = "
+        qstr = "\x1b["+str(3+y0)+";"+str(3+x0)+"H"+ qstr0 + "\x1b[K\x1b[?25h"
+
+    # }}}
+
     t0 = datetime.datetime.now ()
 
     with lock:
@@ -278,7 +284,8 @@ while sec < quiz_timeout:
     # END input processing loop}}}
 
     logging.debug (inpstr)
-    ans = int(s.join(inpstr[0:inplen]))
+    ansstr = s.join(inpstr[0:inplen])
+    ans = int(ansstr)
 
     if ans == result:
         myaddstr(5, 3, "\x1b[32mCORRECT!\x1b[m");
@@ -291,8 +298,7 @@ while sec < quiz_timeout:
 
     td = datetime.datetime.now() - t0
 
-    flog.write( "%1s %3d    %d %s %d = %d\n" % \
-      ( markchar, int(td.total_seconds()), x1, signchar[p_m], x2, ans ) )
+    flog.write( "%1s %3d    %s\n" % (markchar,int(td.total_seconds()),qstr0+ansstr) )
 
     newchar = sys.stdin.read(1)
 
