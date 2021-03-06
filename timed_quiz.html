@@ -3,25 +3,61 @@
 
 <body>
 
+<input type="number" id="txtbx_lower1" value="1"/>
+<input type="number" id="txtbx_upper1" value="10"/>
+<input type="number" id="txtbx_lower2" value="1"/>
+<input type="number" id="txtbx_upper2" value="10"/>
+
 <p id="elapsed_time">0</p>
 <script>
 var t=0;
-var running=0;
+var runstate=0;
+// 0: not started
+// 1: time running - to generate question
+// 2: time paused - waiting for answer
+// -1: completed
+var lower1=1;
+var upper1=10;
+var lower2=1;
+var upper2=10;
 
-function myFunction() {
-  if (running==1) t=t+1;
-  document.getElementById('elapsed_time').innerHTML = t.toString();
+function main_loop() {
+
+  if (runstate===1)
+  {
+    t=t+1;
+    document.getElementById('elapsed_time').innerHTML = t.toString();
+  }
+
 }
 
 function on_click_start() {
-running=1-running;
-if (running==1){
-document.querySelector('#start_button').innerHTML = 'Stop';
-h_timer = setInterval(myFunction, 1000);}
-else {
-document.querySelector('#start_button').innerHTML = 'Start'
-clearTimeout(h_timer);
-}
+  if ( runstate === 0)
+  {
+    // prepare parameters
+    document.querySelector('#start_button').innerHTML = 'Pause!';
+    lower1 = document.getElementById("txtbx_lower1").value;
+    upper1 = document.getElementById("txtbx_upper1").value;
+    lower2 = document.getElementById("txtbx_lower2").value;
+    upper2 = document.getElementById("txtbx_upper2").value;
+    qgen(); // generate first question
+
+    // start main loop
+    runstate = 1;
+    h_timer = setInterval( main_loop, 1000);
+  }
+  else if (runstate===1)
+  {
+    document.querySelector('#start_button').innerHTML = 'Resume'
+    clearTimeout(h_timer);
+    runstate = 2;
+  }
+  else if (runstate===2)
+  {
+    document.querySelector('#start_button').innerHTML = 'Pause!'
+    runstate = 1;
+    h_timer = setInterval( main_loop, 1000);
+  }
 }
 
 function process_ans(ele) {
@@ -32,11 +68,24 @@ function process_ans(ele) {
            document.getElementById('response').innerHTML="Wrong!";
     }
 }
+
+function qgen() {
+
+  x1 = Math.floor(Math.random()*(upper1-lower1+1));
+  x2 = Math.floor(Math.random()*(upper2-lower2+1));
+
+  result = x1 + x2;
+
+  qstr = String(x1) + ' + ' + String(x2) + ' = ?';
+  document.getElementById('question').innerHTML = qstr;
+
+}
+
 </script>
 
 <button id="start_button" onclick="on_click_start()">Start</button>
 
-<p id="question" style="text-align:center;font-size:64pt">7 + 3 = </p>
+<p id="question" style="text-align:center;font-size:64pt">^_^</p>
 <p id="response" style="text-align:center;font-size:48pt"><br></p>
 <input type="number" name="txtbx_ans" style="width:100%;text-align:center;font-size:64pt"
  onkeydown="process_ans(this)"/>
