@@ -1,34 +1,69 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+      margin: 0;
+}
 
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+</style>
+</head>
 <body>
 
-<input type="number" id="txtbx_lower1" value="1"/>
-<input type="number" id="txtbx_upper1" value="10"/>
-<input type="number" id="txtbx_lower2" value="1"/>
-<input type="number" id="txtbx_upper2" value="10"/>
+<input type="number" id="txtbx_timeout" style="width: 30pt;" value="20"/>
+<input type="number" id="txtbx_lower1" style="width: 30pt;" value="1"/>
+<input type="number" id="txtbx_upper1" style="width: 30pt;" value="10"/>
+<input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/>
+<input type="number" id="txtbx_upper2" style="width: 30pt;" value="10"/>
 
 <p id="elapsed_time">0</p>
 <script>
+var h_timer;
 var t=0;
 var runstate=0;
 // 0: not started
 // 1: time running - to generate question
 // 2: time paused - waiting for answer
 // -1: completed
+
+var inpstate=0;
+
+var timeout=10;
 var lower1=1;
 var upper1=10;
 var lower2=1;
 var upper2=10;
+
+var c_correct=0;
+var c_wrong=0;
 
 function time_loop() {
 
   if (runstate===1)
   {
     t=t+1;
-    document.getElementById('elapsed_time').innerHTML = t.toString();
+    if (t<timeout)
+    {
+      document.getElementById('elapsed_time').innerHTML = t.toString();
+      if (t % 5 ===1)
+        document.getElementById('p_apm').innerHTML =
+          "APM: "+String(Math.floor((c_correct+c_wrong)*60./t));
+    }
+    else
+    {
+      document.getElementById('elapsed_time').innerHTML = "TIMEOUT!";
+      runstate=-1;
+      clearTimeout(h_timer);
+    }
   }
-
 }
 
 function on_click_start() {
@@ -36,10 +71,11 @@ function on_click_start() {
   {
     // prepare parameters
     document.querySelector('#start_button').innerHTML = 'Pause!';
-    lower1 = document.getElementById("txtbx_lower1").value;
-    upper1 = document.getElementById("txtbx_upper1").value;
-    lower2 = document.getElementById("txtbx_lower2").value;
-    upper2 = document.getElementById("txtbx_upper2").value;
+    timeout = parseInt(document.getElementById("txtbx_timeout").value);
+    lower1 = parseInt(document.getElementById("txtbx_lower1").value);
+    upper1 = parseInt(document.getElementById("txtbx_upper1").value);
+    lower2 = parseInt(document.getElementById("txtbx_lower2").value);
+    upper2 = parseInt(document.getElementById("txtbx_upper2").value);
     qgen(); // generate first question
 
     // start main loop
@@ -50,7 +86,7 @@ function on_click_start() {
   else if (runstate===1)
   {
     document.querySelector('#start_button').innerHTML = 'Resume'
-    clearTimeout(h_timer);
+    //clearTimeout(h_timer);
     runstate = 2;
   }
   else if (runstate===2)
@@ -58,19 +94,36 @@ function on_click_start() {
     document.querySelector('#start_button').innerHTML = 'Pause!'
     runstate = 1;
     document.getElementById("txtbx_ans").focus();
-    h_timer = setInterval( time_loop, 1000);
+    //h_timer = setInterval( time_loop, 1000);
   }
 }
 
 function process_ans(ele) {
-    if (event.key === 'Enter')
+  if (runstate===1 && event.key === 'Enter' && ele.value)
+    if (inpstate===0)
     {
-        if (parseInt(ele.value) === result)
-           document.getElementById('response').innerHTML="Correct!";
-        else
-           document.getElementById('response').innerHTML="Wrong!";
+      if (parseInt(ele.value) === result)
+      {
+        document.getElementById('response').innerHTML="Correct!";
+        c_correct++;
+      }
+      else
+      {
+        document.getElementById('response').innerHTML="Wrong!";
+        c_wrong++;
+      }
+      document.getElementById('p_correct').innerHTML=
+        "CORRECT: "+c_correct.toString();
+      document.getElementById('p_wrong').innerHTML=
+        "WRONG: "+c_wrong.toString();
+      inpstate=1;
+    }
+    else
+    {
       qgen();
       ele.value='';
+      document.getElementById('response').innerHTML='<br>';
+      inpstate=0;
     }
 }
 
@@ -92,10 +145,10 @@ function qgen() {
 
 <p id="question" style="text-align:center;font-size:64pt">^_^</p>
 <p id="response" style="text-align:center;font-size:48pt"><br></p>
-<input type="number" name="txtbx_ans" style="width:100%;text-align:center;font-size:64pt"
+<input type="number" name="txtbx_ans" autocomplete="off" style="width:100%;text-align:center;font-size:64pt"
  onkeydown="process_ans(this)"/>
-<p id="p_correct" style="text-align:center;font-size:24">Correct:</p>
-<p id="p_wrong" style="text-align:center;font-size:24">Wrong:</p>
+<p id="p_correct" style="text-align:center;font-size:24">CORRECT:</p>
+<p id="p_wrong" style="text-align:center;font-size:24">WRONG:</p>
 <p id="p_apm" style="text-align:center;font-size:24">APM: </p>
 </body>
 </html>
