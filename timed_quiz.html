@@ -18,14 +18,8 @@ input[type=number] {
 </head>
 <body>
 
-<input type="number" id="txtbx_timeout" style="width: 30pt;" value="20"/>
-<input type="number" id="txtbx_lower1" style="width: 30pt;" value="1"/>
-<input type="number" id="txtbx_upper1" style="width: 30pt;" value="10"/>
-<input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/>
-<input type="number" id="txtbx_upper2" style="width: 30pt;" value="10"/>
-
-<p id="elapsed_time">0</p>
 <script>
+const signchar = ['-','+'];
 var h_timer;
 var t=0;
 var runstate=0;
@@ -45,8 +39,11 @@ var upper2=10;
 var c_correct=0;
 var c_wrong=0;
 
-function time_loop() {
+var p_m=0;
+var qstr='';
 
+function time_loop() <!--{{{-->
+{
   if (runstate===1)
   {
     t=t+1;
@@ -64,14 +61,16 @@ function time_loop() {
       clearTimeout(h_timer);
     }
   }
-}
+}<!--}}}-->
 
-function on_click_start() {
+function on_click_start() <!--{{{-->
+{
   if ( runstate === 0)
   {
     // prepare parameters
     document.querySelector('#start_button').innerHTML = 'Pause!';
-    timeout = parseInt(document.getElementById("txtbx_timeout").value);
+    timeout= parseInt(document.getElementById("txtbx_timeout").value);
+    qtype_list = document.getElementById("txtbx_qtype").value.split`,`.map(x=>+x);
     lower1 = parseInt(document.getElementById("txtbx_lower1").value);
     upper1 = parseInt(document.getElementById("txtbx_upper1").value);
     lower2 = parseInt(document.getElementById("txtbx_lower2").value);
@@ -96,9 +95,10 @@ function on_click_start() {
     document.getElementById("txtbx_ans").focus();
     //h_timer = setInterval( time_loop, 1000);
   }
-}
+}<!--}}}-->
 
-function process_ans(ele) {
+function process_ans(ele) <!--{{{-->
+{
   if (runstate===1 && event.key === 'Enter' && ele.value)
     if (inpstate===0)
     {
@@ -125,21 +125,106 @@ function process_ans(ele) {
       document.getElementById('response').innerHTML='<br>';
       inpstate=0;
     }
-}
+}<!--}}}-->
 
-function qgen() {
+function qgen() <!--{{{-->
+{
 
-  x1 = Math.floor(Math.random()*(upper1-lower1+1)+lower1);
-  x2 = Math.floor(Math.random()*(upper2-lower2+1)+lower2);
+  if (qtype_list.length>1)
+    q_type = qtype_list[Math.floor(Math.random()*qtype_list.length)];
+  else
+    q_type = qtype_list[0];
 
-  result = x1 + x2;
+  console.log(q_type);
 
-  qstr = x1.toString() + ' + ' + x2.toString() + ' = ?';
+  if (q_type===5 || q_type===6)
+  {
+    x1 = Math.floor(Math.random()*(upper1-lower1+1)+lower1);
+    x2 = Math.floor(Math.random()*(upper2-lower2+1)+lower2);
+
+  console.log(x1.toString()+', '+x2.toString());
+
+    if (q_type === 6)
+      p_m = Math.floor(Math.random()*2);
+    else
+      p_m = 1;
+
+  console.log(p_m);
+
+    if (p_m===0)
+    {
+      result = x2;
+      x2 = x1+x2;
+    }
+    else
+    {
+      result = x1;
+      x1 = x1+x2;
+    }
+
+    qstr = x1.toString()+" = "+x2.toString()+" "+signchar[p_m]+" ? ";
+  }
+  else if (q_type===4)
+  {
+    result = Math.floor(Math.random()*(upper1-lower1+1)+lower1);
+    p_m = Math.floor(Math.random()*2);
+
+    if (p_m === 0)
+    {
+      x2 = Math.floor(Math.random()*(upper2-lower2+1)+lower2);
+      x1 = result + x2;
+    }
+    else
+    {
+      x2 = Math.floor(Math.random()*(result-lower2+1)+lower2);
+      x1 = result - x2;
+    }
+
+    qstr = x1.toString() +" "+ signchar[p_m] +" "+ x2.toString() +" = ?";
+  }
+  else
+  {
+    x1 = Math.floor(Math.random()*(upper1-lower1+1)+lower1);
+    x2 = Math.floor(Math.random()*(upper2-lower2+1)+lower2);
+    if (q_type === 1)
+      p_m = 1;
+    else if (q_type === 2)
+      p_m = 0;
+    else if (q_type === 3)
+      p_m = Math.floor(Math.random()*2);
+    else
+      p_m = 1 - p_m;
+
+    if (p_m === 0)
+    {
+      if (x1 < x2)
+      {
+        tv = x1;
+        x1 = x2;
+        x2 = tv;
+        result = x1 - x2;
+      }
+    }
+    else
+      result = x1 + x2;
+
+    qstr = x1.toString() +" "+ signchar[p_m] +" "+ x2.toString() +" = ?"
+  }
+
   document.getElementById('question').innerHTML = qstr;
 
-}
+}<!--}}}-->
 
 </script>
+
+<input type="number" id="txtbx_timeout" style="width: 30pt;" value="20"/>
+<input type="text" id="txtbx_qtype"  style="width: 50pt;" value="1"/>
+<input type="number" id="txtbx_lower1" style="width: 30pt;" value="1"/>
+<input type="number" id="txtbx_upper1" style="width: 30pt;" value="10"/>
+<input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/>
+<input type="number" id="txtbx_upper2" style="width: 30pt;" value="10"/>
+
+<p id="elapsed_time">0</p>
 
 <button id="start_button" onclick="on_click_start()">Start</button>
 
@@ -150,5 +235,6 @@ function qgen() {
 <p id="p_correct" style="text-align:center;font-size:24">CORRECT:</p>
 <p id="p_wrong" style="text-align:center;font-size:24">WRONG:</p>
 <p id="p_apm" style="text-align:center;font-size:24">APM: </p>
+
 </body>
 </html>
