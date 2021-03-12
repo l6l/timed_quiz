@@ -59,6 +59,7 @@ function time_loop() <!--{{{-->
       document.getElementById('elapsed_time').innerHTML = "TIMEOUT!";
       runstate=-1;
       clearTimeout(h_timer);
+      document.querySelector('#start_button').innerHTML = 'RESET';
     }
   }
 }<!--}}}-->
@@ -95,6 +96,13 @@ function on_click_start() <!--{{{-->
     document.getElementById("txtbx_ans").focus();
     //h_timer = setInterval( time_loop, 1000);
   }
+  else if (runstate===-1)
+  {
+    t=0;
+    runstate = 0;
+    document.getElementById('elapsed_time').innerHTML = '0';
+    document.querySelector('#start_button').innerHTML = 'Start'
+  }
 }<!--}}}-->
 
 function process_ans(ele) <!--{{{-->
@@ -104,11 +112,13 @@ function process_ans(ele) <!--{{{-->
     {
       if (parseInt(ele.value) === result)
       {
+        document.getElementById('response').style.color = "green";
         document.getElementById('response').innerHTML="Correct!";
         c_correct++;
       }
       else
       {
+        document.getElementById('response').style.color = "red";
         document.getElementById('response').innerHTML="Wrong!";
         c_wrong++;
       }
@@ -217,11 +227,14 @@ function qgen() <!--{{{-->
 
 </script>
 
-<input type="number" id="txtbx_timeout" style="width: 30pt;" value="20"/>
-<input type="text" id="txtbx_qtype"  style="width: 50pt;" value="1"/>
-<input type="number" id="txtbx_lower1" style="width: 30pt;" value="1"/>
+Time: <input type="number" id="txtbx_timeout" style="width: 30pt;" value="20"/>
+&nbsp; &nbsp;
+Type(s): <input type="text" id="txtbx_qtype"  style="width: 50pt;" value="1"/>
+&nbsp; &nbsp;
+x1 range: <input type="number" id="txtbx_lower1" style="width: 30pt;" value="1"/>
 <input type="number" id="txtbx_upper1" style="width: 30pt;" value="10"/>
-<input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/>
+&nbsp; &nbsp;
+x2 range: <input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/>
 <input type="number" id="txtbx_upper2" style="width: 30pt;" value="10"/>
 
 <p id="elapsed_time">0</p>
