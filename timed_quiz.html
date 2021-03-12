@@ -85,13 +85,13 @@ function on_click_start() <!--{{{-->
   }
   else if (runstate===1)
   {
-    document.querySelector('#start_button').innerHTML = 'Resume'
+    document.querySelector('#start_button').innerHTML = 'Resume';
     //clearTimeout(h_timer);
     runstate = 2;
   }
   else if (runstate===2)
   {
-    document.querySelector('#start_button').innerHTML = 'Pause!'
+    document.querySelector('#start_button').innerHTML = 'Pause!';
     runstate = 1;
     document.getElementById("txtbx_ans").focus();
     //h_timer = setInterval( time_loop, 1000);
@@ -101,7 +101,7 @@ function on_click_start() <!--{{{-->
     t=0;
     runstate = 0;
     document.getElementById('elapsed_time').innerHTML = '0';
-    document.querySelector('#start_button').innerHTML = 'Start'
+    document.querySelector('#start_button').innerHTML = 'Start';
   }
 }<!--}}}-->
 
@@ -145,21 +145,15 @@ function qgen() <!--{{{-->
   else
     q_type = qtype_list[0];
 
-  console.log(q_type);
-
   if (q_type===5 || q_type===6)
   {
     x1 = Math.floor(Math.random()*(upper1-lower1+1)+lower1);
     x2 = Math.floor(Math.random()*(upper2-lower2+1)+lower2);
 
-  console.log(x1.toString()+', '+x2.toString());
-
     if (q_type === 6)
       p_m = Math.floor(Math.random()*2);
     else
       p_m = 1;
-
-  console.log(p_m);
 
     if (p_m===0)
     {
@@ -218,7 +212,7 @@ function qgen() <!--{{{-->
     else
       result = x1 + x2;
 
-    qstr = x1.toString() +" "+ signchar[p_m] +" "+ x2.toString() +" = ?"
+    qstr = x1.toString() +" "+ signchar[p_m] +" "+ x2.toString() +" = ?";
   }
 
   document.getElementById('question').innerHTML = qstr;
