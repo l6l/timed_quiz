@@ -61,6 +61,9 @@ function time_loop() <!--{{{-->
       clearTimeout(h_timer);
       document.querySelector('#start_button').innerHTML = 'RESET';
     }
+
+    // always refocus on the input box
+    document.getElementById('txtbx_ans').focus();
   }
 }<!--}}}-->
 
@@ -96,10 +99,12 @@ function on_click_start() <!--{{{-->
     document.getElementById("txtbx_ans").focus();
     //h_timer = setInterval( time_loop, 1000);
   }
-  else if (runstate===-1)
+  else if (runstate===-1) // reset
   {
     t=0;
     runstate = 0;
+    document.getElementById('question').innerHTML = "^_^";
+    document.getElementById('response').innerHTML='<br>';
     document.getElementById('elapsed_time').innerHTML = '0';
     document.querySelector('#start_button').innerHTML = 'Start';
   }
