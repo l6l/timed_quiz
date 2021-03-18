@@ -103,6 +103,11 @@ function on_click_start() <!--{{{-->
   {
     t=0;
     runstate = 0;
+    c_correct = 0;
+    c_wrong = 0;
+    document.getElementById('p_correct').innerHTML= "CORRECT: ";
+    document.getElementById('p_wrong').innerHTML= "WRONG: ";
+    document.getElementById('p_apm').innerHTML= "APM: ";
     document.getElementById('question').innerHTML = "^_^";
     document.getElementById('response').innerHTML='<br>';
     document.getElementById('elapsed_time').innerHTML = '0';
