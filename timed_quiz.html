@@ -48,6 +48,13 @@ input[type=number] {
   font-size: 36px;
 }
 
+.sidepanel .resetbtn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 10pt;
+}
+
 .openbtn {
   font-size: 20px;
   cursor: pointer;
@@ -148,7 +155,14 @@ function on_click_start() <!--{{{-->
   }
   else if (runstate===-1) // reset
   {
+    reset();
+  }
+}<!--}}}-->
+
+function reset()
+{
     t=0;
+    clearTimeout(h_timer);
     runstate = 0;
     c_correct = 0;
     c_wrong = 0;
@@ -161,8 +175,7 @@ function on_click_start() <!--{{{-->
     document.getElementById('txtbx_ans').value = '';
     document.querySelector('#start_button').innerHTML = 'Start';
 		document.getElementById("qhist").value = '';
-  }
-}<!--}}}-->
+}
 
 function process_ans(ele) <!--{{{-->
 {
@@ -312,7 +325,8 @@ x2 range: <input type="number" id="txtbx_lower2" style="width: 30pt;" value="1"/
 
 
 <div id="mySidepanel" class="sidepanel">
-	<textarea id="qhist" cols="30" rows="30"></textarea>
+  <textarea id="qhist" cols="30" rows="30"></textarea>
+  <button class="resetbtn" onclick="reset()">RESET NOW</button>
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
 <!--
   <a href="#">About</a>
